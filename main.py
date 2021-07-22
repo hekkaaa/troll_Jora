@@ -20,8 +20,6 @@ def parser_images(YANDEX_SEARCH):
     print(response.status_code)
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a','serp-item__link')
-    print(agg)
-    print('metka2')
     if (agg == []):
         print('Error - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
         return False
@@ -29,9 +27,7 @@ def parser_images(YANDEX_SEARCH):
         random_number = random.randint(0,len(agg)-1)
 
         #Вторая итерация получения прямой картинки
-        response = requests.get('https://yandex.ru'+agg[random_number]['href'])
-        print("ищем тут")
-        print('https://yandex.ru'+agg[random_number]['href'])
+        # response = requests.get('https://yandex.ru'+agg[random_number]['href'])
         result_2 = 'https://yandex.ru'+agg[random_number]['href']
         return result_2
 
@@ -44,11 +40,11 @@ def parser_images(YANDEX_SEARCH):
         # pre_result = agg[random_number]['data-thumb']
         # result = 'https:'+ pre_result
         # return result
-
+parser_images(YANDEX_SEARCH)
 
 # ВК авторизация и пост на стену.
 def VK_POST(LOGIN,PASS,YANDEX_SEARCH):
-    vk_session = vk_api.VkApi(LOGIN,PASS)
+    vk_session = vk_api.VkApi(LOGIN,hex_dig)
     vk_session.auth()
 
     vk = vk_session.get_api()
@@ -59,11 +55,10 @@ def VK_POST(LOGIN,PASS,YANDEX_SEARCH):
         return False
     else:
         #Отправка картинки на стену пользователю.
-        # print(vk.wall.post(message="test_wall_post_user_script",attachments='https://image.winudf.com/v2/image1/Y29tLmFuZHJvbW8uZGV2NTQ1NDExLmFwcDEwMTkxNDlfc2NyZWVuXzExXzE1NjgzOTczNTFfMDU5/screen-11.jpg?h=710&fakeurl=1&type=.jpg'))
         # Пока отправляем самому себе.
         print(url_images)
         print(type(url_images))
-        result = vk.wall.post(message="test_wall_post_user_script",attachments=url_images)
+        result = vk.wall.post(message="test_wall_post_user_script",attachments=url_images,owner_id="30074569")
         return result
 
 VK_POST(LOGIN,PASS,YANDEX_SEARCH)
