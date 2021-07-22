@@ -15,13 +15,13 @@ hash_object = hashlib.sha256(INPUTPASS.encode())
 hex_dig = hash_object.hexdigest()
 
 ####
-
 def parser_images(YANDEX_SEARCH):
     response = requests.get(YANDEX_SEARCH)
     print(response.status_code)
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a','serp-item__link')
     print(agg)
+    print('metka2')
     if (agg == []):
         print('Error - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
         return False
@@ -32,12 +32,18 @@ def parser_images(YANDEX_SEARCH):
         response = requests.get('https://yandex.ru'+agg[random_number]['href'])
         print("ищем тут")
         print('https://yandex.ru'+agg[random_number]['href'])
-        soup = BeautifulSoup(response.content, "html.parser")
-        agg = soup.find_all('img')
-        random_number = random.randint(0,len(agg)-1)
-        pre_result = agg[random_number]['data-thumb']
-        result = 'https:'+ pre_result
-        return result
+        result_2 = 'https://yandex.ru'+agg[random_number]['href']
+        return result_2
+
+        # Эта часть обрезана по причине того что VK.api не ждет ссылки "//im0-tub-ru.yandex.net/i?id=b5120b88709074ee9bbc08c4b34a16b5&n=13"
+        # даже если дополнить их. В ручную если кидать на сайте то все ок. ХЗ в чем проблема.
+
+        # soup = BeautifulSoup(response.content, "html.parser")
+        # agg = soup.find_all('img')
+        # random_number = random.randint(0,len(agg)-1)
+        # pre_result = agg[random_number]['data-thumb']
+        # result = 'https:'+ pre_result
+        # return result
 
 
 # ВК авторизация и пост на стену.
@@ -56,7 +62,8 @@ def VK_POST(LOGIN,PASS,YANDEX_SEARCH):
         # print(vk.wall.post(message="test_wall_post_user_script",attachments='https://image.winudf.com/v2/image1/Y29tLmFuZHJvbW8uZGV2NTQ1NDExLmFwcDEwMTkxNDlfc2NyZWVuXzExXzE1NjgzOTczNTFfMDU5/screen-11.jpg?h=710&fakeurl=1&type=.jpg'))
         # Пока отправляем самому себе.
         print(url_images)
+        print(type(url_images))
         result = vk.wall.post(message="test_wall_post_user_script",attachments=url_images)
         return result
 
-print(VK_POST(LOGIN,INPUTPASS,YANDEX_SEARCH))
+VK_POST(LOGIN,PASS,YANDEX_SEARCH)
