@@ -65,18 +65,19 @@ def post_vk(login, password, search_query, user_ids):
 
 if __name__ == "__main__":
 
-    print('Введите текст для поиска открытки.')
-    print('Например: православные открытки с надписями')
-    search_text = input('Искать: ')
+    while True:
+        print('Введите текст для поиска открытки.')
+        print('Например: православные открытки с надписями')
+        search_text = input('Искать: ')
 
-    login = input("Введите ваш логин VK: ")
-    password = input("Введите ваш пароль: ")
-    print("принимаются id только в цифрах и без пробелов!!!")
-    print("Введите через запятую id нужных пользователей: ")
-    user_ids = input().split(',')
+        login = input("Введите ваш логин VK: ")
+        password = input("Введите ваш пароль: ")
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-    # # хеширование пароля
-    hash_object = hashlib.sha256(password.encode())
-    hex_dig = hash_object.hexdigest()
+        print("Введите через запятую id нужных пользователей: ")
+        # Получение списка ID разделенных запятыми
+        user_ids = input().split(',')
+        # Удаление пустых значений и пробелов
+        user_ids = [user_id.strip() for user_id in user_ids if user_id]
 
-    post_vk(login, hex_dig, search_text, user_ids)
+        post_vk(login, password_hash, search_text, user_ids)
