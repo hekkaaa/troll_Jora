@@ -1,5 +1,4 @@
 import vk_api
-import hashlib
 import requests
 import random
 from bs4 import BeautifulSoup
@@ -14,7 +13,7 @@ def parse_images(search_text):
         "source" :      "related-0"}
 
     response = requests.get(query, params=params)
-    
+
     if response.status_code == 200:
         print('Картинки получены')
     else:
@@ -24,7 +23,7 @@ def parse_images(search_text):
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
     if (agg == []):
-        print('Error - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
+        print('Ошибка - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
         return False
     else:
         random_number = random.randint(0, len(agg) - 1)
@@ -78,12 +77,10 @@ if __name__ == "__main__":
 
         login = input("Введите ваш логин VK: ")
         password = input("Введите ваш пароль: ")
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-        print("Введите через запятую id нужных пользователей: ")
-        # Получение списка ID разделенных запятыми
-        user_ids = input().split(',')
+        # Получение списка ID пользователей, разделенных запятыми
+        user_ids = input("Введите через запятую id нужных пользователей: ").split(',')
         # Удаление пустых значений и пробелов
         user_ids = [user_id.strip() for user_id in user_ids if user_id]
 
-        post_vk(login, password_hash, search_text, user_ids)
+        post_vk(login, password, search_text, user_ids)
