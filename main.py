@@ -16,7 +16,7 @@ def parse_images(search_text):
         "text":         search_text, 
         "source" :      "related-0"}
 
-    # Передача GET запроса на сервер
+    # Отправка GET запроса на сервер
     response = requests.get(query, params=params)
 
     if response.status_code == 200:
