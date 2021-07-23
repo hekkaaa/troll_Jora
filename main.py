@@ -1,22 +1,22 @@
 import vk_api
 import hashlib
+import requests
+import random
+from bs4 import BeautifulSoup
 
 search_text = input('Введите текст для поиска открытки.\n\
 Например: православные открытки с надписями\nИскать: ')
 
 YANDEX_SEARCH = f'https://yandex.ru/images/search?from=tabbar&nomisspell=1&text={search_text}&source=related-0'
 
-print("Введите ваш логин VK")
-LOGIN = input()
-print("Введите пароль")
-INPUTPASS = input()
+login = input("Введите ваш логин VK: ")
+password = input("Введите ваш пароль: ")
 print("принимаются id только в цифрах и без пробелов!!!")
 print("Введите через запятую id нужных пользователей: ")
-ID_USER = input()
-ID_USER = ID_USER.split(',')
+user_ids = input().split(',')
 
 # # хеширование пароля
-hash_object = hashlib.sha256(INPUTPASS.encode())
+hash_object = hashlib.sha256(password.encode())
 hex_dig = hash_object.hexdigest()
 
 ####
@@ -47,25 +47,26 @@ def parser_images(YANDEX_SEARCH):
         # return result
 
 # ВК авторизация и пост на стену.
-def VK_POST(LOGIN, PASS, YANDEX_SEARCH,ID_USER):
-    vk_session = vk_api.VkApi(LOGIN, PASS)
+def VK_POST(login, password, search_query, user_ids):
+    vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
     vk = vk_session.get_api()
 
-    url_images = parser_images(YANDEX_SEARCH)
+    url_images = parser_images(search_query)
     if (url_images == False):
         print("Не взлетело")
         return False
     else:
         # Отправка картинки на стену пользователю.
-        for ID_USER in ID_USER:
+        for user_id in user_ids:
             try:
-                vk.wall.post(message="Post sent by Python script", attachments=url_images, owner_id=ID_USER)
+                vk.wall.post(message="Post sent by Python script", 
+                attachments=url_images, owner_id=user_id)
             except vk_api.exceptions.ApiError:
-                print(f"Error! Ошибка ID '{ID_USER}'. Не верно указан id, либо стена закрыта для записи")
+                print(f"Error! Ошибка ID '{user_id}'. Не верно указан id, либо стена закрыта для записи")
             except:
                 print("ERROR!")
     return True
 
-VK_POST(LOGIN,hex_dig,YANDEX_SEARCH,ID_USER)
+VK_POST(login, hex_dig, YANDEX_SEARCH, user_ids)
