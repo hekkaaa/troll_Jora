@@ -4,7 +4,7 @@ import random
 from bs4 import BeautifulSoup
 
 
-def parse_images(search_text):
+def parse_images(search_text: str) -> str or None:
 
     # Адрес запроса картинок
     query = 'https://yandex.ru/images/search'
@@ -45,8 +45,9 @@ def parse_images(search_text):
         return image_link
 
 
-# ВК авторизация и пост на стену.
-def post_vk(login, password, search_query, user_ids, message):
+def post_vk(login: str, password: str, search_query: str, user_ids: list, message: str) -> bool:
+
+    # Авторизация Вконтакте
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
