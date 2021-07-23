@@ -4,24 +4,16 @@ import requests
 import random
 from bs4 import BeautifulSoup
 
-search_text = input('Введите текст для поиска открытки.\n\
-Например: православные открытки с надписями\nИскать: ')
 
-YANDEX_SEARCH = f'https://yandex.ru/images/search?from=tabbar&nomisspell=1&text={search_text}&source=related-0'
+def parser_images(search_text):
+    query = 'https://yandex.ru/images/search'
+    params = {
+        "from" :        "tabbar", 
+        "nomisspell":   1, 
+        "text":         requests.utils.quote(search_text), 
+        "source" :      "related-0"}
 
-login = input("Введите ваш логин VK: ")
-password = input("Введите ваш пароль: ")
-print("принимаются id только в цифрах и без пробелов!!!")
-print("Введите через запятую id нужных пользователей: ")
-user_ids = input().split(',')
-
-# # хеширование пароля
-hash_object = hashlib.sha256(password.encode())
-hex_dig = hash_object.hexdigest()
-
-####
-def parser_images(YANDEX_SEARCH):
-    response = requests.get(YANDEX_SEARCH)
+    response = requests.get(query, params=params)
     print(response.status_code)
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
@@ -46,6 +38,7 @@ def parser_images(YANDEX_SEARCH):
         # result = 'https:'+ pre_result
         # return result
 
+
 # ВК авторизация и пост на стену.
 def VK_POST(login, password, search_query, user_ids):
     vk_session = vk_api.VkApi(login, password)
@@ -69,4 +62,21 @@ def VK_POST(login, password, search_query, user_ids):
                 print("ERROR!")
     return True
 
-VK_POST(login, hex_dig, YANDEX_SEARCH, user_ids)
+
+if __name__ == "__main__":
+
+    print('Введите текст для поиска открытки.')
+    print('Например: православные открытки с надписями')
+    search_text = input('Искать: ')
+
+    login = input("Введите ваш логин VK: ")
+    password = input("Введите ваш пароль: ")
+    print("принимаются id только в цифрах и без пробелов!!!")
+    print("Введите через запятую id нужных пользователей: ")
+    user_ids = input().split(',')
+
+    # # хеширование пароля
+    hash_object = hashlib.sha256(password.encode())
+    hex_dig = hash_object.hexdigest()
+
+    VK_POST(login, hex_dig, search_text, user_ids)
