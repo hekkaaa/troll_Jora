@@ -5,13 +5,18 @@ from bs4 import BeautifulSoup
 
 
 def parse_images(search_text):
+
+    # Адрес запроса картинок
     query = 'https://yandex.ru/images/search'
+
+    # Параметры запроса
     params = {
         "from" :        "tabbar", 
         "nomisspell":   1, 
-        "text":         requests.utils.quote(search_text), 
+        "text":         search_text, 
         "source" :      "related-0"}
 
+    # Передача GET запроса на сервер
     response = requests.get(query, params=params)
 
     if response.status_code == 200:
@@ -22,16 +27,15 @@ def parse_images(search_text):
 
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
-    if (agg == []):
+    if not agg:
         print('Ошибка - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
-        return False
+        return None
     else:
         random_number = random.randint(0, len(agg) - 1)
 
         # Вторая итерация получения прямой картинки
-        # response = requests.get('https://yandex.ru'+agg[random_number]['href'])
-        result_2 = 'https://yandex.ru' + agg[random_number]['href']
-        return result_2
+        result = 'https://yandex.ru' + agg[random_number]['href']
+        return result
 
         # Эта часть обрезана по причине того что VK.api не ждет ссылки "//im0-tub-ru.yandex.net/i?id=b5120b88709074ee9bbc08c4b34a16b5&n=13"
         # даже если дополнить их. В ручную если кидать на сайте то все ок. ХЗ в чем проблема.
@@ -52,7 +56,7 @@ def post_vk(login, password, search_query, user_ids):
     vk = vk_session.get_api()
 
     url_images = parse_images(search_query)
-    if (url_images == False):
+    if not url_images:
         print("Не взлетело")
         return False
     else:
@@ -62,9 +66,9 @@ def post_vk(login, password, search_query, user_ids):
                 vk.wall.post(message="Post sent by Python script", 
                 attachments=url_images, owner_id=user_id)
             except vk_api.exceptions.ApiError:
-                print(f"Error! Ошибка ID '{user_id}'. Не верно указан id, либо стена закрыта для записи")
-            except:
-                print("ERROR!")
+                print(f"Ошибка ID '{user_id}'. Неверно указан ID, либо стена закрыта для записи")
+            except Exception:
+                print("Неизвестная ошибка :(")
     return True
 
 
