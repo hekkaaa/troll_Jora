@@ -3,7 +3,6 @@ import requests
 import random
 from bs4 import BeautifulSoup
 
-
 def parse_images(search_text: str) -> str or None:
 
     # Адрес запроса картинок
