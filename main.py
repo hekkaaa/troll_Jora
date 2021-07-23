@@ -46,7 +46,7 @@ def parse_images(search_text):
 
 
 # ВК авторизация и пост на стену.
-def post_vk(login, password, search_query, user_ids):
+def post_vk(login, password, search_query, user_ids, message):
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
@@ -60,7 +60,7 @@ def post_vk(login, password, search_query, user_ids):
         # Отправка картинки на стену пользователю.
         for user_id in user_ids:
             try:
-                vk.wall.post(message="Post sent by Python script", 
+                vk.wall.post(message=message, 
                 attachments=url_images, owner_id=user_id)
                 print('Картинка отправлена на стену пользователя!')
             except vk_api.exceptions.ApiError:
@@ -85,4 +85,8 @@ if __name__ == "__main__":
         # Удаление пустых значений и пробелов
         user_ids = [user_id.strip() for user_id in user_ids if user_id]
 
-        post_vk(login, password, search_text, user_ids)
+        message = input('Введите подпись для картинки (необязательно): ')
+        if not message:
+            message = 'Sent with python script'
+
+        post_vk(login, password, search_text, user_ids, message)
