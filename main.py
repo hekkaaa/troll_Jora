@@ -5,7 +5,7 @@ import random
 from bs4 import BeautifulSoup
 
 
-def parser_images(search_text):
+def parse_images(search_text):
     query = 'https://yandex.ru/images/search'
     params = {
         "from" :        "tabbar", 
@@ -40,13 +40,13 @@ def parser_images(search_text):
 
 
 # ВК авторизация и пост на стену.
-def VK_POST(login, password, search_query, user_ids):
+def post_vk(login, password, search_query, user_ids):
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
     vk = vk_session.get_api()
 
-    url_images = parser_images(search_query)
+    url_images = parse_images(search_query)
     if (url_images == False):
         print("Не взлетело")
         return False
@@ -79,4 +79,4 @@ if __name__ == "__main__":
     hash_object = hashlib.sha256(password.encode())
     hex_dig = hash_object.hexdigest()
 
-    VK_POST(login, hex_dig, search_text, user_ids)
+    post_vk(login, hex_dig, search_text, user_ids)
