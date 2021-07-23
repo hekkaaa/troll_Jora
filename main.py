@@ -1,69 +1,92 @@
 import vk_api
-import hashlib
+import requests
+import random
+from bs4 import BeautifulSoup
 
-YANDEX_SEARCH = 'https://yandex.ru/images/search?from=tabbar&nomisspell=1&text=%D0%BF%D1%80%D0%B0%D0%B2%D0%BE%D1%81%D0%BB%D0%B0%D0%B2%D0%BD%D1%8B%D0%B5%20%D0%BE%D1%82%D0%BA%D1%80%D1%8B%D1%82%D0%BA%D0%B8%20%D1%81%20%D0%BD%D0%B0%D0%B4%D0%BF%D0%B8%D1%81%D1%8F%D0%BC%D0%B8&source=related-0'
+def parse_images(search_text: str) -> str or None:
 
-print("Введите ваш логин VK")
-LOGIN = input()
-print("Введите пароль")
-INPUTPASS = input()
-print("принимаются id только в цифрах и без пробелов!!!")
-print("Введите через запятую id нужных пользователей: ")
-ID_USER = input()
-ID_USER = ID_USER.split(',')
+    # Адрес запроса картинок
+    query = 'https://yandex.ru/images/search'
 
-## хеширование пароля
-hash_object = hashlib.sha256(INPUTPASS.encode())
-hex_dig = hash_object.hexdigest()
+    # Параметры запроса
+    params = {
+        "from" :        "tabbar", 
+        "nomisspell":   1, 
+        "text":         search_text, 
+        "source" :      "related-0"}
 
-####
-def parser_images(YANDEX_SEARCH):
-    response = requests.get(YANDEX_SEARCH)
-    print(f'SERVER response: {response.status_code}')
+    # Отправка GET запроса на сервер
+    response = requests.get(query, params=params)
+
+    if response.status_code == 200:
+        print('Картинки получены')
+    else:
+        print(f'Не могу получить картинки по запросу {search_text}')
+        return None
+
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
-    if (agg == []):
-        print('Error - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
-        return False
+    if not agg:
+        print('Ошибка - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
+        return None
     else:
+        # Выбор случайной картинки из полученного ответа
         random_number = random.randint(0, len(agg) - 1)
+        image_link = requests.utils.unquote(agg[random_number]['href'])
 
-        # Вторая итерация получения прямой картинки
-        # response = requests.get('https://yandex.ru'+agg[random_number]['href'])
-        result_2 = 'https://yandex.ru' + agg[random_number]['href']
-        return result_2
+        # Получение индексов начала и конца ссылки на источник картинки
+        start = image_link.find('img_url=') + len('img_url=')
+        end = image_link[start:].find('&') + start
 
-        # Эта часть обрезана по причине того что VK.api не ждет ссылки "//im0-tub-ru.yandex.net/i?id=b5120b88709074ee9bbc08c4b34a16b5&n=13"
-        # даже если дополнить их. В ручную если кидать на сайте то все ок. ХЗ в чем проблема.
+        # Обрезка ссылки для получения ссылки на источник
+        image_link = image_link[start:end]
 
-        # soup = BeautifulSoup(response.content, "html.parser")
-        # agg = soup.find_all('img')
-        # random_number = random.randint(0,len(agg)-1)
-        # pre_result = agg[random_number]['data-thumb']
-        # result = 'https:'+ pre_result
-        # return result
+        return image_link
 
-# ВК авторизация и пост на стену.
-def VK_POST(LOGIN, PASS, YANDEX_SEARCH,ID_USER):
-    vk_session = vk_api.VkApi(LOGIN, PASS)
+
+def post_vk(login: str, password: str, search_query: str, user_ids: list, message: str) -> bool:
+
+    # Авторизация Вконтакте
+    vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
     vk = vk_session.get_api()
 
-    url_images = parser_images(YANDEX_SEARCH)
-    if (url_images == False):
+    url_images = parse_images(search_query)
+    if not url_images:
         print("Не взлетело")
         return False
     else:
         # Отправка картинки на стену пользователю.
-        for ID_USER in ID_USER:
+        for user_id in user_ids:
             try:
-                vk.wall.post(message="Post sent by Python script", attachments=url_images, owner_id=ID_USER)
-            except vk_api.exceptions.ApiError as ex:
-                print(f"\nError! Ошибка ID '{ID_USER}':")
-                print(ex)
-            except:
-                print("ERROR!")
+                vk.wall.post(message=message, 
+                attachments=url_images, owner_id=user_id)
+                print('Картинка отправлена на стену пользователя!')
+            except vk_api.exceptions.ApiError:
+                print(f"Ошибка ID '{user_id}'. Неверно указан ID, либо стена закрыта для записи")
+            except Exception:
+                print("Неизвестная ошибка :(")
     return True
 
-VK_POST(LOGIN,hex_dig,YANDEX_SEARCH,ID_USER)
+
+if __name__ == "__main__":
+
+    while True:
+        print('Введите текст для поиска открытки.')
+        print('Например: православные открытки с надписями')
+        search_text = input('Искать: ')
+
+        login = input("Введите ваш логин VK: ")
+        password = input("Введите ваш пароль: ")
+
+        # Получение списка ID пользователей, разделенных запятыми
+        user_ids = input("Введите через запятую id нужных пользователей: ").split(',')
+        # Удаление пустых значений и пробелов
+        user_ids = [user_id.strip() for user_id in user_ids if user_id]
+
+        message = input('Введите подпись для картинки (необязательно): ')
+        if not message:
+            message = 'Sent with python script'
+
+        post_vk(login, password, search_text, user_ids, message)
