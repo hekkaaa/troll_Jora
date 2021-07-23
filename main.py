@@ -37,16 +37,6 @@ def parse_images(search_text):
         result = 'https://yandex.ru' + agg[random_number]['href']
         return result
 
-        # Эта часть обрезана по причине того что VK.api не ждет ссылки "//im0-tub-ru.yandex.net/i?id=b5120b88709074ee9bbc08c4b34a16b5&n=13"
-        # даже если дополнить их. В ручную если кидать на сайте то все ок. ХЗ в чем проблема.
-
-        # soup = BeautifulSoup(response.content, "html.parser")
-        # agg = soup.find_all('img')
-        # random_number = random.randint(0,len(agg)-1)
-        # pre_result = agg[random_number]['data-thumb']
-        # result = 'https:'+ pre_result
-        # return result
-
 
 # ВК авторизация и пост на стену.
 def post_vk(login, password, search_query, user_ids):
