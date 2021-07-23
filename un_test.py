@@ -5,7 +5,7 @@ class TestMath(unittest.TestCase):
 
     def test_post_vk(self):
         # Необходимо вставить значения для прохождения теста
-        self.assertTrue(type(post_vk('', '', '', [''])))
+        self.assertTrue(type(post_vk('login', 'password', 'text', ['user_id'], 'message')))
 
     def test_parser_images(self):
         search_text = 'православные картинки с надписями'
