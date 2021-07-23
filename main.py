@@ -31,11 +31,18 @@ def parse_images(search_text):
         print('Ошибка - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
         return None
     else:
+        # Выбор случайной картинки из полученного ответа
         random_number = random.randint(0, len(agg) - 1)
+        image_link = requests.utils.unquote(agg[random_number]['href'])
 
-        # Вторая итерация получения прямой картинки
-        result = 'https://yandex.ru' + agg[random_number]['href']
-        return result
+        # Получение индексов начала и конца ссылки на источник картинки
+        start = image_link.find('img_url=') + len('img_url=')
+        end = image_link[start:].find('&') + start
+
+        # Обрезка ссылки для получения ссылки на источник
+        image_link = image_link[start:end]
+
+        return image_link
 
 
 # ВК авторизация и пост на стену.
@@ -55,6 +62,7 @@ def post_vk(login, password, search_query, user_ids):
             try:
                 vk.wall.post(message="Post sent by Python script", 
                 attachments=url_images, owner_id=user_id)
+                print('Картинка отправлена на стену пользователя!')
             except vk_api.exceptions.ApiError:
                 print(f"Ошибка ID '{user_id}'. Неверно указан ID, либо стена закрыта для записи")
             except Exception:
