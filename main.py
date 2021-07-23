@@ -14,7 +14,13 @@ def parse_images(search_text):
         "source" :      "related-0"}
 
     response = requests.get(query, params=params)
-    print(response.status_code)
+    
+    if response.status_code == 200:
+        print('Картинки получены')
+    else:
+        print(f'Не могу получить картинки по запросу {search_text}')
+        return None
+
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
     if (agg == []):
