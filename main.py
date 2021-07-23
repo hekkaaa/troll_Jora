@@ -12,14 +12,14 @@ print("Введите через запятую id нужных пользова
 ID_USER = input()
 ID_USER = ID_USER.split(',')
 
-# # хеширование пароля
+## хеширование пароля
 hash_object = hashlib.sha256(INPUTPASS.encode())
 hex_dig = hash_object.hexdigest()
 
 ####
 def parser_images(YANDEX_SEARCH):
     response = requests.get(YANDEX_SEARCH)
-    print(response.status_code)
+    print(f'SERVER response: {response.status_code}')
     soup = BeautifulSoup(response.content, "html.parser")
     agg = soup.find_all('a', 'serp-item__link')
     if (agg == []):
@@ -59,8 +59,9 @@ def VK_POST(LOGIN, PASS, YANDEX_SEARCH,ID_USER):
         for ID_USER in ID_USER:
             try:
                 vk.wall.post(message="Post sent by Python script", attachments=url_images, owner_id=ID_USER)
-            except vk_api.exceptions.ApiError:
-                print(f"Error! Ошибка ID '{ID_USER}'. Не верно указан id, либо стена закрыта для записи")
+            except vk_api.exceptions.ApiError as ex:
+                print(f"\nError! Ошибка ID '{ID_USER}':")
+                print(ex)
             except:
                 print("ERROR!")
     return True
