@@ -58,7 +58,7 @@ def VK_POST(LOGIN, PASS, YANDEX_SEARCH,ID_USER):
         # Отправка картинки на стену пользователю.
         for ID_USER in ID_USER:
             try:
-                vk.wall.post(message="test_wall_post_user_script", attachments=url_images, owner_id=ID_USER)
+                vk.wall.post(message="Post sent by Python script", attachments=url_images, owner_id=ID_USER)
             except vk_api.exceptions.ApiError:
                 print(f"Error! Ошибка ID '{ID_USER}'. Не верно указан id, либо стена закрыта для записи")
             except:
