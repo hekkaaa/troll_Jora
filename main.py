@@ -3,17 +3,17 @@ import requests
 import random
 from bs4 import BeautifulSoup
 
-def parse_images(search_text: str) -> str or None:
 
+def parse_images(search_text: str) -> str or None:
     # Адрес запроса картинок
     query = 'https://yandex.ru/images/search'
 
     # Параметры запроса
     params = {
-        "from" :        "tabbar", 
-        "nomisspell":   1, 
-        "text":         search_text, 
-        "source" :      "related-0"}
+        "from": "tabbar",
+        "nomisspell": 1,
+        "text": search_text,
+        "source": "related-0"}
 
     # Отправка GET запроса на сервер
     response = requests.get(query, params=params)
@@ -45,7 +45,6 @@ def parse_images(search_text: str) -> str or None:
 
 
 def post_vk(login: str, password: str, search_query: str, user_ids: list, message: str) -> bool:
-
     # Авторизация Вконтакте
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
@@ -60,9 +59,9 @@ def post_vk(login: str, password: str, search_query: str, user_ids: list, messag
         # Отправка картинки на стену пользователю.
         for user_id in user_ids:
             try:
-                vk.wall.post(message=message, 
-                attachments=url_images, owner_id=user_id)
-                print('Картинка отправлена на стену пользователя!')
+                vk.wall.post(message=message,
+                             attachments=url_images, owner_id=user_id)
+                print(f'Картинка отправлена на стену пользователя {user_id}!')
             except vk_api.exceptions.ApiError as ex:
                 print(f"\nError! Ошибка ID '{user_id}':")
                 print(ex)
@@ -73,13 +72,13 @@ def post_vk(login: str, password: str, search_query: str, user_ids: list, messag
 
 if __name__ == "__main__":
 
-    while True:
-        print('Введите текст для поиска открытки.')
-        print('Например: православные открытки с надписями')
-        search_text = input('Искать: ')
+    login = input("Введите ваш логин VK: ")
+    password = input("Введите ваш пароль: ")
+    
 
-        login = input("Введите ваш логин VK: ")
-        password = input("Введите ваш пароль: ")
+    while True:
+        print('Введите текст для поиска открытки. Например: "православные открытки с надписями"\n')
+        search_text = input('Искать: ')
 
         # Получение списка ID пользователей, разделенных запятыми
         user_ids = input("Введите через запятую id нужных пользователей: ").split(',')
@@ -91,3 +90,6 @@ if __name__ == "__main__":
             message = 'Sent with python script'
 
         post_vk(login, password, search_text, user_ids, message)
+
+        print("Рассылка закончена")
+        print("="*40 + '\n')
