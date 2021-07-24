@@ -64,7 +64,7 @@ def post_vk(login: str, password: str, search_query: str, user_ids: list, messag
                 attachments=url_images, owner_id=user_id)
                 print('Картинка отправлена на стену пользователя!')
             except vk_api.exceptions.ApiError as ex:
-                print(f"\nError! Ошибка ID '{ID_USER}':")
+                print(f"\nError! Ошибка ID '{user_id}':")
                 print(ex)
             except Exception:
                 print("Неизвестная ошибка :(")
