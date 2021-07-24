@@ -2,6 +2,7 @@ import vk_api
 import requests
 import random
 from bs4 import BeautifulSoup
+import hashlib
 
 
 def parse_images(search_text: str) -> str or None:
@@ -85,7 +86,19 @@ def post_vk(login: str, password: str, search_query: str, user_ids: list, messag
 
         # Загрузка картинки на сервера ВКонтакте
         upload = vk_api.VkUpload(vk)
-        photo = upload.photo_wall(filepath)
+
+        # Здесь просходит ошибка [100]
+        # vk_api.exceptions.ApiError: [100] One of the parameters specified was missing or invalid: photos_list is invalid
+        # ВК не нравится картинка.
+        try:
+            photo = upload.photo_wall(filepath)
+        except vk_api.exceptions.ApiError as ex:
+            print("Ошибка загрузки картинки. Попробуйте еще раз")
+            print(ex)
+            return False
+        except:
+            print("Неизвестная ошибка :(")
+            return True
 
         # Получение данных картинки из ответа VK API
         owner_id = photo[0]['owner_id']
@@ -113,7 +126,10 @@ if __name__ == "__main__":
 
     login = input("Введите ваш логин VK: ")
     password = input("Введите ваш пароль: ")
-    
+
+    ## хеширование пароля
+    hash_object = hashlib.sha256(password.encode())
+    password = hash_object.hexdigest()
 
     while True:
         print('Введите текст для поиска открытки. Например: "православные открытки с надписями"\n')
@@ -131,4 +147,4 @@ if __name__ == "__main__":
         post_vk(login, password, search_text, user_ids, message)
 
         print("Рассылка закончена")
-        print("="*40 + '\n')
+        print("=" * 40 + '\n')
