@@ -44,6 +44,21 @@ def parse_images(search_text: str) -> str or None:
         return image_link
 
 
+def download_image(image_url: str) -> str:
+    # Загрузка картинки в директорию images/
+
+    response = requests.get(image_url)
+
+    # Имя файла - случайное число + последние четыре символа URL (расширение файла)
+    filepath = 'images/' + str(random.randint(0, 10**6)) + image_url[-4:]
+
+    file = open(filepath, "wb")
+    file.write(response.content)
+    file.close()
+
+    return filepath
+
+
 def post_vk(login: str, password: str, search_query: str, user_ids: list, message: str) -> bool:
     # Авторизация Вконтакте
     vk_session = vk_api.VkApi(login, password)
@@ -51,16 +66,40 @@ def post_vk(login: str, password: str, search_query: str, user_ids: list, messag
 
     vk = vk_session.get_api()
 
-    url_images = parse_images(search_query)
-    if not url_images:
+    # Поиск картинок и выбор одной случайной
+    image_url = parse_images(search_query)
+
+    if not image_url:
         print("Не взлетело")
         return False
     else:
         # Отправка картинки на стену пользователю.
+
+        # Загрузка картинки в директорию images
+        try:
+            filepath = download_image(image_url)
+            print('Картинка успешно загружена в папку images')
+        except Exception:
+            print('Не удалось загрузить картинку')
+            return False
+
+        # Загрузка картинки на сервера ВКонтакте
+        upload = vk_api.VkUpload(vk)
+        photo = upload.photo_wall(filepath)
+
+        # Получение данных картинки из ответа VK API
+        owner_id = photo[0]['owner_id']
+        photo_id = photo[0]['id']
+        access_key = photo[0]['access_key']
+
+        # Создание ВК-ссылки на картинку
+        attachment = f'photo{owner_id}_{photo_id}_{access_key}'
+
+        # Постинг картинки каждому юзеру из user_ids
         for user_id in user_ids:
             try:
                 vk.wall.post(message=message,
-                             attachments=url_images, owner_id=user_id)
+                             attachments=attachment, owner_id=user_id)
                 print(f'Картинка отправлена на стену пользователя {user_id}!')
             except vk_api.exceptions.ApiError as ex:
                 print(f"\nError! Ошибка ID '{user_id}':")
