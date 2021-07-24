@@ -49,8 +49,8 @@ def download_image(image_url: str) -> str:
 
     response = requests.get(image_url)
 
-    # Имя файла - случайное число + последние четыре символа URL (расширение файла)
-    filepath = 'images/' + str(random.randint(0, 10**6)) + image_url[-4:]
+    # Имя файла - image + последние четыре символа URL (расширение файла)
+    filepath = 'images/image' + image_url[-4:]
 
     file = open(filepath, "wb")
     file.write(response.content)
