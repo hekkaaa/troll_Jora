@@ -2,7 +2,7 @@ import vk_api
 import requests
 import random
 from bs4 import BeautifulSoup
-import hashlib
+import os
 
 
 def handle_image_link(image_link: str) -> str:
@@ -15,7 +15,7 @@ def handle_image_link(image_link: str) -> str:
     # Обрезка ссылки для получения ссылки на источник
     image_link = image_link[start:end]
 
-    # Дополнительная проверка        
+    # Дополнительная проверка
     if image_link.find('?') != -1:
         end = image_link.find('?')
         image_link = image_link[:end]
@@ -25,7 +25,7 @@ def handle_image_link(image_link: str) -> str:
 
 def parse_images(search_text: str) -> str or None:
     # Получение картинок по запросу и возврат ссылки на одну случайную
-    
+
     # Адрес запроса картинок
     query = 'https://yandex.ru/images/search'
 
@@ -48,7 +48,7 @@ def parse_images(search_text: str) -> str or None:
     if not agg:
         print('Ошибка - вероятно яндекс ссылка опять дико тупит. Попробуй еще раз')
         return None
-    
+
     # Выбор случайной картинки из полученного ответа
     image_link = ''
     while image_link[-4:] not in ['.jpg', '.png', '.bmp', '.gif']:
@@ -79,7 +79,7 @@ def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
 
     # Поиск картинок и выбор одной случайной
     image_url = parse_images(search_query)
-        
+
     # Загрузка картинки в директорию images
     try:
         filepath = download_image(image_url)
@@ -115,13 +115,13 @@ def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
             print(ex)
         except Exception:
             print("Неизвестная ошибка :(")
-            
+
     return True
 
 
 def auth_vk(login: str, password: str) -> vk_api.vk_api.VkApiMethod:
     # Авторизация Вконтакте
-    
+
     vk_session = vk_api.VkApi(login, password)
     vk_session.auth()
 
@@ -129,6 +129,10 @@ def auth_vk(login: str, password: str) -> vk_api.vk_api.VkApiMethod:
 
 
 if __name__ == "__main__":
+
+    # Зачистка файла авторизации json от прошлого запуска скрипта.
+    if os.path.isfile('vk_config.v2.json'):
+        os.remove('vk_config.v2.json')
 
     while True:
         login = input("Введите ваш логин VK: ")
@@ -142,7 +146,7 @@ if __name__ == "__main__":
             print('Неверный пароль. Попробуйте еще раз.')
         except Exception as ex:
             print('Не удалось пройти авторизацию. Возникла ошибка:', ex)
-    
+
     while True:
         print('Введите текст для поиска открытки. Например: "православные открытки с надписями"\n')
         search_text = input('Искать: ')
