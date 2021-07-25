@@ -134,10 +134,6 @@ if __name__ == "__main__":
         login = input("Введите ваш логин VK: ")
         password = input("Введите ваш пароль: ")
 
-        ## хеширование пароля
-        # hash_object = hashlib.sha256(password.encode())
-        # password = hash_object.hexdigest()
-
         try:
             vk = auth_vk(login, password)
             print('Авторизация ВКонтакте прошла успешно!')
