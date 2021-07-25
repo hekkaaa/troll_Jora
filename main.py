@@ -169,8 +169,7 @@ if __name__ == "__main__":
 
         for i in range(count):
             post_vk(vk, search_text, user_ids, message)
-            print(f'Опубликовано постов: {i + 1}/{count}', end='\r')
-        print()
+            print(f'Опубликовано постов: {i + 1}/{count}')
 
         print("Рассылка закончена")
         print("=" * 40 + '\n')
