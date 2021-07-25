@@ -161,8 +161,16 @@ if __name__ == "__main__":
         user_ids = [user_id.strip() for user_id in user_ids if user_id]
 
         message = input('Введите подпись для картинки (необязательно): ')
+        try:
+            count = int(input('Введите количество постов (по умолчанию: 1): '))
+        except ValueError:
+            count = 1
+            print('Не понял ответа. Установлено значение по умолчанию')
 
-        post_vk(vk, search_text, user_ids, message)
+        for i in range(count):
+            post_vk(vk, search_text, user_ids, message)
+            print(f'Опубликовано постов: {i + 1}/{count}', end='\r')
+        print()
 
         print("Рассылка закончена")
         print("=" * 40 + '\n')
