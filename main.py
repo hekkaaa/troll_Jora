@@ -78,6 +78,7 @@ def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
     # Авторизация Вконтакте
 
     # Загрузка картинки
+    count = 0 # Значение для ошибки загрузки картинки.
     while True:
         try:
             # Получение ссылки на случайную картинку
@@ -85,7 +86,7 @@ def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
 
             # Загрузка картинки в текущую директорию
             filepath = download_image(image_url)
-            
+
             # Загрузка картинки на сервера ВК
             photo = vk_api.VkUpload(vk).photo_wall(filepath)
 
@@ -95,10 +96,17 @@ def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
             # Выход из цикла
             print('Картинка успешно загружена')
             break
-            
+
         except Exception:
             # Если возникла ошибка - повторить
-            continue
+
+            if count == 5:
+                # Если уже 5 попыток то значит баг.
+                print("Вероятнее всего цикл завис. Перезапустите скрипт.")
+                break
+            else:
+                count+1
+                continue
 
     # Получение данных картинки из ответа VK API
     owner_id = photo[0]['owner_id']
