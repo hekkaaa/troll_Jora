@@ -60,12 +60,12 @@ def parse_images(search_text: str) -> str or None:
 
 
 def download_image(image_url: str) -> str:
-    # Загрузка картинки в директорию images/
+    # Загрузка картинки в текущую директорию
 
     response = requests.get(image_url)
 
     # Имя файла - image + последние четыре символа URL (расширение файла)
-    filepath = 'images/image' + image_url[-4:]
+    filepath = 'image' + image_url[-4:]
 
     file = open(filepath, "wb")
     file.write(response.content)
@@ -77,24 +77,28 @@ def download_image(image_url: str) -> str:
 def post_vk(vk, search_query: str, user_ids: list, message: str) -> bool:
     # Авторизация Вконтакте
 
-    # Поиск картинок и выбор одной случайной
-    image_url = parse_images(search_query)
+    # Загрузка картинки
+    while True:
+        try:
+            # Получение ссылки на случайную картинку
+            image_url = parse_images(search_query)
 
-    # Загрузка картинки в директорию images
-    try:
-        filepath = download_image(image_url)
-        print('Картинка успешно загружена в папку images')
-    except Exception:
-        print('Не удалось загрузить картинку')
-        return False
+            # Загрузка картинки в текущую директорию
+            filepath = download_image(image_url)
+            
+            # Загрузка картинки на сервера ВК
+            photo = vk_api.VkUpload(vk).photo_wall(filepath)
 
-    # Загрузка картинки на сервера ВКонтакте
-    upload = vk_api.VkUpload(vk)
-    try:
-        photo = upload.photo_wall(filepath)
-    except Exception:
-        print('Не удалось загрузить картинку на сервера ВКонтакте')
-        return False
+            # Удаление загруженной картинки из текущей директории
+            os.remove(filepath)
+
+            # Выход из цикла
+            print('Картинка успешно загружена')
+            break
+            
+        except Exception:
+            # Если возникла ошибка - повторить
+            continue
 
     # Получение данных картинки из ответа VK API
     owner_id = photo[0]['owner_id']
@@ -157,10 +161,15 @@ if __name__ == "__main__":
         user_ids = [user_id.strip() for user_id in user_ids if user_id]
 
         message = input('Введите подпись для картинки (необязательно): ')
-        if not message:
-            message = 'Sent with python script'
+        try:
+            count = int(input('Введите количество постов (по умолчанию: 1): '))
+        except ValueError:
+            count = 1
+            print('Не понял ответа. Установлено значение по умолчанию')
 
-        post_vk(vk, search_text, user_ids, message)
+        for i in range(count):
+            post_vk(vk, search_text, user_ids, message)
+            print(f'Опубликовано постов: {i + 1}/{count}')
 
         print("Рассылка закончена")
         print("=" * 40 + '\n')
